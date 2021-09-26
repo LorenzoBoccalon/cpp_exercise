@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 
 typedef std::vector<ulong> digit_set;
@@ -59,7 +60,7 @@ int main() {
         std::cout << "Test 3: failed" << std::endl;
     }
     // test 4
-    if (find_next_smallest(126456) == 300000) {
+    if (find_next_smallest(123456) == 700000) {
         std::cout << "Test 4: passed" << std::endl;
     } else {
         std::cout << "Test 4: failed" << std::endl;
@@ -129,7 +130,8 @@ ulong parse_input() {
 }
 
 digit_set possible_digits(ulong number) {
-    digit_set digits = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    digit_set digits(10);
+    std::iota(digits.begin(), digits.end(), 0);
     digit_set to_be_removed = {};
     std::string number_str = std::to_string(number);
     for (char c: number_str) {
