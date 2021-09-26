@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 typedef std::vector<ulong> digit_set;
 
@@ -13,29 +14,31 @@ ulong find_next_smallest(ulong number = 0);
 
 ulong parse_input();
 
-ulong n_digits(const std::string &number_str);
-
-ulong stoi(char c);
+ulong magnitude(ulong number);
 
 digit_set possible_digits(ulong number);
 
-ulong first_digit(const std::string &number_str);
+ulong minimum_possible_first_digit(ulong number);
 
-std::string itos(ulong number);
+ulong minimum_possible_other_digit(ulong number);
+
+ulong first_digit(ulong number);
 
 int main() {
     auto in = parse_input();
-    auto ins = itos(in);
-    auto f = first_digit(ins);
-    auto l = n_digits(ins);
-    std::cout << "number: " << in << std::endl;
-    std::cout << "first digit: " << f << std::endl;
-    std::cout << "length: " << l << std::endl;
-    auto ds = possible_digits(in);
-    for (auto d: ds) {
-        std::cout << d << " ";
-    }
-    std::cout << std::endl;
+// debug
+//    std::cout << "number: " << in << std::endl;
+//    std::cout << "first digit: " << first_digit(in) << std::endl;
+//    std::cout << "magnitude: " << magnitude(in) << std::endl;
+//    std::cout << "new first digit: " << minimum_possible_first_digit(in) << std::endl;
+//    std::cout << "available digits: " << std::endl;
+//    auto ds = possible_digits(in);
+//    for (auto d: ds) {
+//        std::cout << d << " ";
+//    }
+//    std::cout << std::endl;
+    auto next = find_next_smallest(in);
+    std::cout << "next possible number: " << next << std::endl;
 
     // test 1
     if (find_next_smallest(2) == 3) {
@@ -63,31 +66,60 @@ int main() {
     }
 }
 
-ulong find_next_smallest(ulong number) { // 1234
-    ulong next = 0;
-//    std::cout << "number: " << number << std::endl;
-    // first digits = min possible digits diff from 0
-    auto ds = possible_digits(number); // 0 5 6 7 8 9
-    auto it = ds.begin();
-    auto fd = first_digit(itos(number)); // 1
-//    std::cout << "fd: " << fd << std::endl;
-    auto new_fd = *it; // 0
-    while (it != ds.end() && new_fd < fd) {
-        new_fd = *++it;
-    }
-//    std::cout << "new_fd: " << new_fd << std::endl;
+ulong magnitude(ulong number) {
+    return (ulong) std::log10(number);
+}
 
+ulong first_digit(ulong number) {
+    return (number / (ulong) pow(10, magnitude(number))); // integer division
+}
+
+ulong minimum_possible_other_digit(ulong number) {
+    auto possibilities = possible_digits(number);
+    auto it = possibilities.begin();
+    return *it;
+}
+
+ulong minimum_possible_first_digit(ulong number) {
+    auto fd = first_digit(number);
+    ulong new_fd = 0;
+    auto possibilities = possible_digits(number);
+    auto it = possibilities.begin();
+    if (*it == 0) it++;
+    auto case_nine = *it;
+    if (fd == 9) return case_nine;
+    for (; it != possibilities.end(); it++) {
+        if (fd < *it) {
+            new_fd = *it;
+            break;
+        }
+    }
+    return new_fd;
+}
+
+ulong find_next_smallest(ulong number) { // 1234
+    ulong next = minimum_possible_first_digit(number);
+//    std::cout << "number: " << number << std::endl;
+    auto exp = magnitude(number);
+    if (first_digit(number) == 9) exp++;
+    next *= pow(10, exp);
+//    std::cout << "next before: " << next << std::endl;
+//    std::cout << "exponent: " << exp << std::endl;
+    // from second digit to end
+    for (auto i = exp - 1; i != -1; i--) {
+        // get new possible digit
+        ulong d = minimum_possible_other_digit(number);
+//        std::cout << "min: " << d << std::endl;
+        // get the number to add
+        d *= (ulong) pow(10, i);
+        // sum
+        next += d;
+//        std::cout << "added: " << d << std::endl;
+    }
+//    std::cout << "next after: " << next << std::endl;
     return next;
 }
 
-std::string itos(ulong number) {
-    return std::to_string(number);
-}
-
-ulong first_digit(const std::string &number_str) {
-    auto f = number_str.at(0);
-    return stoi(f);
-}
 
 ulong parse_input() {
     std::cout << "insert number: ";
@@ -96,20 +128,12 @@ ulong parse_input() {
     return number;
 }
 
-ulong n_digits(const std::string &number_str) {
-    return number_str.length();
-}
-
-ulong stoi(char c) {
-    return c - '0';  // convert char to int
-}
-
 digit_set possible_digits(ulong number) {
     digit_set digits = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     digit_set to_be_removed = {};
     std::string number_str = std::to_string(number);
     for (char c: number_str) {
-        ulong d = stoi(c);  // convert char to int
+        ulong d = c - '0';  // convert char to int
         to_be_removed.push_back(d);
     }
 
