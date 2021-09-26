@@ -8,10 +8,13 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <set>
 
 typedef std::vector<ulong> digit_set;
 
 ulong find_next_smallest(ulong number = 0);
+
+ulong find_next_smallest_alternative(ulong number = 0);
 
 ulong parse_input();
 
@@ -154,4 +157,37 @@ digit_set possible_digits(ulong number) {
     }
 
     return possible_digits;
+}
+
+ulong find_next_smallest_alternative(ulong number) {
+    std::string s = std::to_string(number);
+    std::string result = "0" + s;
+    std::string all = "0123456789";
+    std::set<char> valids(all.begin(), all.end());
+
+    for (auto c : s) {
+        valids.erase(c);
+    }
+
+    if (valids.size() == 0) {
+        throw std::runtime_error("Cannot compute next. No valid digits left.");
+    }
+
+    char first = s[0];
+    auto next = std::find_if(valids.begin(), valids.end(), [=](char c) { return c > first; });
+    if (next == valids.end()) {
+        auto firstNonZero = valids.begin();
+        if (*firstNonZero == '0') {
+            firstNonZero++;
+        }
+        result[0] = *firstNonZero;
+        result[1] = *valids.begin();
+    } else {
+        result[1] = *next;
+    }
+    for (int i = 1; i < s.size(); i++) {
+        result[i + 1] = *valids.begin();
+    }
+
+    return atol(result.c_str());
 }
