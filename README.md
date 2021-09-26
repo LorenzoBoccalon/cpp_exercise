@@ -1,4 +1,4 @@
-# cpp_exercise
+# C++ Exercise
 Given a positive integer *n*, find the next positive integer *n'* with no common digitis.
 
 ex: 
