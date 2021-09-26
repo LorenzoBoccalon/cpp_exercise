@@ -176,11 +176,11 @@ ulong find_next_smallest_alternative(ulong number) {
     char first = s[0];
     auto next = std::find_if(valids.begin(), valids.end(), [=](char c) { return c > first; });
     if (next == valids.end()) {
-        auto firstNonZero = valids.begin();
-        if (*firstNonZero == '0') {
-            firstNonZero++;
+        auto first_nonzero = valids.begin();
+        if (*first_nonzero == '0') {
+            first_nonzero++;
         }
-        result[0] = *firstNonZero;
+        result[0] = *first_nonzero;
         result[1] = *valids.begin();
     } else {
         result[1] = *next;
